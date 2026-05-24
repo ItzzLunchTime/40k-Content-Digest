@@ -18,6 +18,7 @@ Items are ranked by composite score: engagement + velocity + cross-platform spre
 
 | Week | Link |
 |------|------|
+| 2026-05-24 | [digest-2026-05-24.html](digest-2026-05-24.html) |
 | 2026-05-22 | [digest-2026-05-22.html](digest-2026-05-22.html) |
 
 ## Plans & Documentation
