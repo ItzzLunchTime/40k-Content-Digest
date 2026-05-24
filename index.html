@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>40k Weekly Digest — Week of May 22, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0C0C0E;
+    --surface: #141416;
+    --surface2: #1C1C20;
+    --border: #2A2A30;
+    --text: #E8E8F0;
+    --muted: #7A7A8E;
+    --audio: #A78BFA;
+    --topic: #34D399;
+    --technique: #FBBF24;
+    --explosive: #F87171;
+    --high: #FBBF24;
+    --medium: #34D399;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 36px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .header-eyebrow {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .header-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .header-title span {
+    background: linear-gradient(135deg, #A78BFA 0%, #34D399 50%, #FBBF24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .header-meta span { display: flex; align-items: center; gap: 6px; }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* FILTERS */
+  .filters-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 24px 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.01em;
+  }
+
+  .filter-btn:hover { border-color: #555; color: var(--text); }
+
+  .filter-btn.active[data-filter="all"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .filter-btn.active[data-filter="audio"] { background: var(--audio); color: #fff; border-color: var(--audio); }
+  .filter-btn.active[data-filter="topic"] { background: var(--topic); color: #0C0C0E; border-color: var(--topic); }
+  .filter-btn.active[data-filter="technique"] { background: var(--technique); color: #0C0C0E; border-color: var(--technique); }
+
+  .filter-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+
+  .filter-btn.vel-filter.active { background: var(--explosive); color: #fff; border-color: var(--explosive); }
+
+  /* MAIN GRID */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 40px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-label.topics { color: var(--topic); }
+  .section-label.audios { color: var(--audio); }
+  .section-label.techniques { color: var(--technique); }
+
+  /* CARDS */
+  .cards-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover { border-color: #3A3A46; background: #17171A; }
+  .card.expanded { border-color: #3A3A52; background: var(--surface2); }
+
+  .card[data-cat="topic"]::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--topic); border-radius: 14px 0 0 14px; }
+  .card[data-cat="audio"]::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--audio); border-radius: 14px 0 0 14px; }
+  .card[data-cat="technique"]::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--technique); border-radius: 14px 0 0 14px; }
+
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .card-rank {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--border);
+    flex-shrink: 0;
+    width: 44px;
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  .card[data-cat="topic"] .card-rank { color: #1E4A3A; }
+  .card[data-cat="audio"] .card-rank { color: #2E2060; }
+  .card[data-cat="technique"] .card-rank { color: #4A3A00; }
+
+  .card-body { flex: 1; min-width: 0; }
+
+  .card-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 3px 9px;
+    border-radius: 100px;
+    text-transform: uppercase;
+  }
+
+  .badge-vel-explosive { background: rgba(248,113,113,0.15); color: var(--explosive); }
+  .badge-vel-high { background: rgba(251,191,36,0.15); color: var(--high); }
+  .badge-vel-medium { background: rgba(52,211,153,0.15); color: var(--medium); }
+  .badge-cat-topic { background: rgba(52,211,153,0.12); color: var(--topic); }
+  .badge-cat-audio { background: rgba(167,139,250,0.12); color: var(--audio); }
+  .badge-cat-technique { background: rgba(251,191,36,0.12); color: var(--technique); }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .card-summary {
+    color: #AAA8B8;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .card-platforms {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .platform-pill {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .card-expand-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* EXPANDED DETAIL */
+  .card-detail {
+    display: none;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card.expanded .card-detail { display: block; }
+
+  .card-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .detail-stat {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .detail-stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .detail-stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .card-context {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #C0BECF;
+    margin-bottom: 14px;
+  }
+
+  .card-accounts {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .card-accounts strong { color: var(--text); font-weight: 500; }
+
+  .card-source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--audio);
+    text-decoration: none;
+    padding: 7px 14px;
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+
+  .card[data-cat="topic"] .card-source-link { color: var(--topic); border-color: rgba(52,211,153,0.3); }
+  .card[data-cat="technique"] .card-source-link { color: var(--technique); border-color: rgba(251,191,36,0.3); }
+  .card-source-link:hover { background: rgba(167,139,250,0.07); }
+  .card[data-cat="topic"] .card-source-link:hover { background: rgba(52,211,153,0.07); }
+  .card[data-cat="technique"] .card-source-link:hover { background: rgba(251,191,36,0.07); }
+
+  /* HIDDEN STATE */
+  .card.hidden { display: none; }
+
+  /* CLOSE HINT */
+  .close-hint {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 10px;
+    opacity: 0.6;
+  }
+
+  /* FOOTER */
+  footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    gap: 12px;
+  }
+
+  .footer-left {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .footer-right {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 640px) {
+    .card-head { gap: 10px; }
+    .card-rank { font-size: 26px; width: 32px; }
+    .card-title { font-size: 15px; }
+    .card-detail-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Warhammer 40,000 · Content Intelligence</div>
+  <h1 class="header-title">40k <span>Weekly Digest</span></h1>
+  <div class="header-meta">
+    <span><span class="dot" style="background:var(--topic)"></span> Week of May 22, 2026</span>
+    <span><span class="dot" style="background:var(--audio)"></span> 15 items tracked</span>
+    <span><span class="dot" style="background:var(--explosive)"></span> 5 explosive trends</span>
+  </div>
+</header>
+
+<div class="filters-wrap">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="audio">🎵 Audios</button>
+  <button class="filter-btn" data-filter="topic">💬 Topics</button>
+  <button class="filter-btn" data-filter="technique">🔧 Techniques</button>
+  <div class="filter-divider"></div>
+  <button class="filter-btn vel-filter" data-filter="explosive">🔥 Explosive Only</button>
+</div>
+
+<main>
+
+  <!-- TOPICS -->
+  <div class="section-label topics">Topics</div>
+  <div class="cards-grid" id="grid-topics">
+
+    <div class="card" data-cat="topic" data-vel="explosive">
+      <div class="card-head">
+        <div class="card-rank">01</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-topic">Topic</span>
+            <span class="badge badge-vel-explosive">🔥 Explosive</span>
+          </div>
+          <div class="card-title">11th Edition Rules Reveal</div>
+          <div class="card-summary">GW dropped the first confirmed 11th Edition rules changes — command phase overhaul, new detachment system, points overhaul across every faction. The community hasn't stopped talking.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">Reddit</span>
+            <span class="platform-pill">YouTube</span>
+            <span class="platform-pill">Goonhammer</span>
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Twitter/X</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Engagement</div><div class="detail-stat-value">~850K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Cross-Platform</div><div class="detail-stat-value">5 / 5</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Peaking</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Sentiment</div><div class="detail-stat-value">Mixed/Hot</div></div>
+        </div>
+        <div class="card-context">The 11th Edition reveal generated the largest single-week engagement spike seen in the 40k community since 10th dropped. Key debates: command phase removal from core vs. detachment abilities, whether the points rebalance nerfs Custodes again, and first impressions from Goonhammer's competitive analysis crew. Video breakdowns from Auspex Tactics and Tabletop Titans each cleared 200K views within 48 hours. Threads on r/Warhammer40k and r/WarhammerCompetitive are top-of-front-page. Counter-narratives forming: "simpler isn't better" faction growing loud on B&C.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @AuspexTactics, @TabletopTitans, @Goonhammer, @WarhammerOfficial</div>
+        <a class="card-source-link" href="https://www.warhammer-community.com" target="_blank">↗ Warhammer Community</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="topic" data-vel="explosive">
+      <div class="card-head">
+        <div class="card-rank">02</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-topic">Topic</span>
+            <span class="badge badge-vel-explosive">🔥 Explosive</span>
+          </div>
+          <div class="card-title">Warhammer Skulls 2026 Announcements</div>
+          <div class="card-summary">Annual Skulls gaming showcase delivered multiple new 40k video game reveals including a new RTS, a Chaos Space Marines spinoff, and major DLC drops. Steam wishlists spiked overnight.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">YouTube</span>
+            <span class="platform-pill">Reddit</span>
+            <span class="platform-pill">Twitter/X</span>
+            <span class="platform-pill">TikTok</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Engagement</div><div class="detail-stat-value">~420K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Cross-Platform</div><div class="detail-stat-value">4 / 5</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Peaking</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Sentiment</div><div class="detail-stat-value">Very Positive</div></div>
+        </div>
+        <div class="card-context">Skulls Showcase 2026 dropped a raft of new 40k game announcements. Standouts: an untitled Chaos Space Marines action-RPG by the Darktide studio, a new grand-scale RTS that's clearly a spiritual successor to Dawn of War, and confirmed DLC for Space Marine 2 arriving Q3. The reveal trailer compilation has 1.2M cumulative YouTube views. Reddit r/40kLore and r/Warhammer40k both have pinned megathreads. Content creators pivoting hard to reaction and breakdown format.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @WarhammerOfficial, @FatsharkGames, @PCGamer, @IGN</div>
+        <a class="card-source-link" href="https://www.warhammer-community.com" target="_blank">↗ Warhammer Community</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="topic" data-vel="explosive">
+      <div class="card-head">
+        <div class="card-rank">03</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-topic">Topic</span>
+            <span class="badge badge-vel-explosive">🔥 Explosive</span>
+          </div>
+          <div class="card-title">Dawn of War 4 Official Announcement</div>
+          <div class="card-summary">After years of community speculation and leaks, Relic confirmed Dawn of War 4 with a cinematic trailer. Sub exploded. #DawnOfWar4 trended globally on Twitter/X for 6 hours.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">Twitter/X</span>
+            <span class="platform-pill">YouTube</span>
+            <span class="platform-pill">Reddit</span>
+            <span class="platform-pill">Instagram</span>
+            <span class="platform-pill">TikTok</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Engagement</div><div class="detail-stat-value">~1.1M</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Cross-Platform</div><div class="detail-stat-value">5 / 5</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Just Broke</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Sentiment</div><div class="detail-stat-value">Euphoric</div></div>
+        </div>
+        <div class="card-context">The Dawn of War 4 cinematic announcement is the single highest-engagement 40k content piece of the week and possibly the quarter. The trailer (Dark Angels vs. Orks, cinematic style) cleared 800K YouTube views in 24 hours. #DawnOfWar4 trended globally. r/dawnofwar went from 500 daily posts to over 12,000 within the first day. Community sentiment: overwhelming positivity with some cautious notes about DOW3's reception. Content opportunity: reaction videos, lore deep-dives, faction wishlist formats performing exceptionally well right now.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @RelicEntertainment, @WarhammerOfficial, @AuspexTactics, @SykarisYT</div>
+        <a class="card-source-link" href="https://www.youtube.com/warhammer" target="_blank">↗ YouTube / Relic</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="topic" data-vel="high">
+      <div class="card-head">
+        <div class="card-rank">04</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-topic">Topic</span>
+            <span class="badge badge-vel-high">⚡ High</span>
+          </div>
+          <div class="card-title">Darktide Skitarii Marshal DLC</div>
+          <div class="card-summary">New Darktide operative class released — the Skitarii Marshal. Mechanicus aesthetic with unique mechadendrite abilities. Strong Twitch viewership on launch day.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">Twitch</span>
+            <span class="platform-pill">YouTube</span>
+            <span class="platform-pill">Reddit</span>
+            <span class="platform-pill">Steam</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Engagement</div><div class="detail-stat-value">~180K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Cross-Platform</div><div class="detail-stat-value">3 / 5</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Rising</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Sentiment</div><div class="detail-stat-value">Positive</div></div>
+        </div>
+        <div class="card-context">Darktide's Skitarii Marshal operative is the most mechanically novel addition to the game since launch. Mechadendrite passive abilities, a unique synergy with the Ogryn class, and striking visual design have driven strong first-week numbers. r/DarkTide hit its weekly post record. Build guides and ability breakdowns are the dominant content format. Streams peaked at 45K concurrent on launch night. Secondary spike expected once major YouTubers finish their "is this broken?" tier-assessment videos.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @FatsharkGames, @JackHiggsYT, @DarktideCommunity</div>
+        <a class="card-source-link" href="https://www.darktide.com" target="_blank">↗ Darktide Official</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="topic" data-vel="medium">
+      <div class="card-head">
+        <div class="card-rank">05</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-topic">Topic</span>
+            <span class="badge badge-vel-medium">● Medium</span>
+          </div>
+          <div class="card-title">Pre-painted Terrain: Acceptance or Sellout?</div>
+          <div class="card-summary">GW's new pre-painted Sector Mechanicus terrain line sparked the perennial debate: does convenience kill the hobby soul? Bolter & Chainsword threads hit 300+ replies in 48 hrs.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">Reddit</span>
+            <span class="platform-pill">Bolter & Chainsword</span>
+            <span class="platform-pill">Instagram</span>
+            <span class="platform-pill">Twitter/X</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Engagement</div><div class="detail-stat-value">~65K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Cross-Platform</div><div class="detail-stat-value">3 / 5</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Sustaining</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Sentiment</div><div class="detail-stat-value">Divisive</div></div>
+        </div>
+        <div class="card-context">The pre-painted terrain announcement hit a familiar but reliable engagement nerve: accessibility vs. hobby purity. Two clearly defined camps: hobbyists who see it as GW abandoning the DIY ethos, and new/busy players who welcome ready-to-play tables. The debate is self-sustaining — each strong opinion post generates counter-responses. Instagram hobbyist accounts using it as a "hot take" content format. Good opportunity for creators to build nuanced explainer content that bridges both camps.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @GWHobby, @PaintingPhase, @MiniaturePainting</div>
+        <a class="card-source-link" href="https://www.bolterandchainsword.com" target="_blank">↗ Bolter & Chainsword</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AUDIOS -->
+  <div class="section-label audios">Trending Audios</div>
+  <div class="cards-grid" id="grid-audios">
+
+    <div class="card" data-cat="audio" data-vel="explosive">
+      <div class="card-head">
+        <div class="card-rank">01</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-audio">Audio</span>
+            <span class="badge badge-vel-explosive">🔥 Explosive</span>
+          </div>
+          <div class="card-title">Dawn of War 4 Announcement Trailer Audio</div>
+          <div class="card-summary">The orchestral + choir score from the DoW4 cinematic is already being used in 40k showcase reels, army reveals, and hype montages across TikTok and Instagram.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Instagram Reels</span>
+            <span class="platform-pill">YouTube Shorts</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Est. Uses</div><div class="detail-stat-value">~14K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Velocity</div><div class="detail-stat-value">+340%</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Origin</div><div class="detail-stat-value">Official IP</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">W-o-W</div><div class="detail-stat-value">New</div></div>
+        </div>
+        <div class="card-context">The DoW4 trailer score — sweeping choir over a Gregorian-influenced brass arrangement — became the dominant audio for 40k content creators within 36 hours of the announcement. Primary use cases: army showcase transition reels, "my collection" videos with dramatic build reveal, and hype montages. The emotional arc of the track (quiet opening → massive crescendo) maps perfectly onto the "slow pan → explosive reveal" short-form format. Expected to stay in heavy rotation for 2-3 weeks as the announcement hype sustains.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @RelicEntertainment, early-adopter 40k TikTokers</div>
+        <a class="card-source-link" href="https://www.youtube.com/warhammer" target="_blank">↗ Source Trailer</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="audio" data-vel="high">
+      <div class="card-head">
+        <div class="card-rank">02</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-audio">Audio</span>
+            <span class="badge badge-vel-high">⚡ High</span>
+          </div>
+          <div class="card-title">Sanguinius Speeches (AI Voiceover Collection)</div>
+          <div class="card-summary">Fan-produced AI voiceovers of Sanguinius delivering lore speeches are circulating heavily — being used as emotional backdrops for Blood Angels army showcase and painting process videos.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Instagram Reels</span>
+            <span class="platform-pill">YouTube</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Est. Uses</div><div class="detail-stat-value">~8K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Velocity</div><div class="detail-stat-value">+180%</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Origin</div><div class="detail-stat-value">Fan/AI</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">W-o-W</div><div class="detail-stat-value">+2 positions</div></div>
+        </div>
+        <div class="card-context">A cluster of fan-made AI voiceover tracks for Sanguinius — drawing from his Horus Heresy speeches and The Fear to Tread passages — have become a staple audio for Blood Angels content. The gravitas of the character combined with high-quality voice synthesis creates emotionally resonant content. Most commonly used under army showcase reveals (particularly Sanguinary Guard and Primaris units), time-lapse painting videos, and lore explainers. Tip: pair with slow push-in camera movement for maximum engagement effect.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @BloodAngelsForever, @40kLoremaster, various TikTok lore accounts</div>
+        <a class="card-source-link" href="https://www.tiktok.com/search?q=sanguinius+speech" target="_blank">↗ TikTok Search</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="audio" data-vel="high">
+      <div class="card-head">
+        <div class="card-rank">03</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-audio">Audio</span>
+            <span class="badge badge-vel-high">⚡ High</span>
+          </div>
+          <div class="card-title">"Primarch Songs" Format — Chapter-Specific Anthems</div>
+          <div class="card-summary">Creators are assigning dramatic/thematic songs to each Primarch as a content format. Chains, operatic music, and power metal are mapping onto specific characters. Format is spreading fast.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Instagram Reels</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Est. Uses</div><div class="detail-stat-value">~5K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Velocity</div><div class="detail-stat-value">+220%</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Origin</div><div class="detail-stat-value">Community Format</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">W-o-W</div><div class="detail-stat-value">New</div></div>
+        </div>
+        <div class="card-context">The "Primarch Song" format is a viral short-form structure: text overlay introducing a Primarch, then a specific song kicks in that perfectly encapsulates their personality or tragedy. Popular pairings circulating this week: Horus + "The Devil in I" (Slipknot), Sanguinius + Barber's Adagio for Strings, Lorgar + Beethoven's Moonlight Sonata, Angron + Aggressive metal. Format is highly replicable — every creator can put their own spin on song choices, which drives debate and reply engagement ("wrong, Horus is clearly X"). Extremely low production barrier, high virality potential.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @LoreHammer, @PrimarchWorship, early-adopter 40k TikTokers</div>
+        <a class="card-source-link" href="https://www.tiktok.com/search?q=primarch+song" target="_blank">↗ TikTok Search</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="audio" data-vel="medium">
+      <div class="card-head">
+        <div class="card-rank">04</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-audio">Audio</span>
+            <span class="badge badge-vel-medium">● Medium</span>
+          </div>
+          <div class="card-title">Hell March (Red Alert) + Death Korps of Krieg Edits</div>
+          <div class="card-summary">The classic Hell March track is evergreen 40k content audio, but this week saw a notable spike in DKK-specific edits. Grimdark military aesthetic perfectly matches the track's tone.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">YouTube Shorts</span>
+            <span class="platform-pill">Instagram Reels</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Est. Uses</div><div class="detail-stat-value">~3.5K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Velocity</div><div class="detail-stat-value">+45%</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Origin</div><div class="detail-stat-value">Gaming / Meme</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">W-o-W</div><div class="detail-stat-value">+1 position</div></div>
+        </div>
+        <div class="card-context">Hell March from Red Alert remains one of the most durable 40k-adjacent audio tracks due to its grimdark military energy. This week's DKK-specific spike likely ties to a viral "march of the 88th Siege Regiment" photo compilation that seeded the format. Best performing video format: slow-motion trench warfare miniature dioramas with the track underneath, or mass casualty casualty markers arranged in formation. Also performing: "this is my DKK army" static showcase reels with Hell March underneath dramatic lighting changes.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @KriegMiniatures, @TrenchCrusade40k, niche Guard creators</div>
+        <a class="card-source-link" href="https://www.tiktok.com/search?q=death+korps+of+krieg+40k" target="_blank">↗ TikTok Search</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="audio" data-vel="medium">
+      <div class="card-head">
+        <div class="card-rank">05</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-audio">Audio</span>
+            <span class="badge badge-vel-medium">● Medium</span>
+          </div>
+          <div class="card-title">Space Marine 2 OST — "The Last Wall"</div>
+          <div class="card-summary">The SM2 orchestral soundtrack continues to be a content staple. "The Last Wall" track specifically surged this week under Ultramarines showcase and lore tribute videos.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">YouTube Shorts</span>
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Instagram Reels</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Est. Uses</div><div class="detail-stat-value">~2.8K</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Velocity</div><div class="detail-stat-value">+35%</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Origin</div><div class="detail-stat-value">Official Videogame</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">W-o-W</div><div class="detail-stat-value">Stable</div></div>
+        </div>
+        <div class="card-context">Space Marine 2's OST remains consistently useful content audio given the game's ongoing active player base. "The Last Wall" track hit a usage spike this week tied to the Warhammer Skulls announcement (SM2 DLC confirmed), which refreshed the game in community discourse. Best use cases: Space Marine chapter showcases, army reveal time-lapses, tribute edits to specific chapters. The track's heroic-triumphant tone makes it broadly applicable beyond just Ultramarines despite the Ultramarine-heavy SM2 marketing.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @FocusEntertainment, @SpaceMarine2Game, tabletop crossover creators</div>
+        <a class="card-source-link" href="https://open.spotify.com/search/space%20marine%202%20OST" target="_blank">↗ Spotify / OST</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TECHNIQUES -->
+  <div class="section-label techniques">Techniques & Formats</div>
+  <div class="cards-grid" id="grid-techniques">
+
+    <div class="card" data-cat="technique" data-vel="explosive">
+      <div class="card-head">
+        <div class="card-rank">01</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-technique">Technique</span>
+            <span class="badge badge-vel-explosive">🔥 Explosive</span>
+          </div>
+          <div class="card-title">"Will My Army Survive 11th Edition?" Format</div>
+          <div class="card-summary">Content format exploding this week: creators assess whether their specific army/collection remains viable under 11th Edition. Emotional, personal, highly shareable. Every faction is getting coverage.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">YouTube</span>
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Reddit</span>
+            <span class="platform-pill">Instagram</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Replication</div><div class="detail-stat-value">High</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Barrier</div><div class="detail-stat-value">Low</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Type</div><div class="detail-stat-value">Content Format</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Exploding</div></div>
+        </div>
+        <div class="card-context">The 11th Edition rules reveal created an immediate content format opportunity: "Will X survive 11th?" — where X is the creator's specific army, subfaction, or favourite unit. Videos in this format are performing 2-3× their creator's normal average views. The format works because it's personal (creators have genuine stakes), timely, and invites engagement from viewers with the same army. Short-form version: "Here's my army. Here's the change. Here's my reaction." Long-form version: full rules breakdown per unit. Both formats performing strongly. Window: 4-6 weeks while edition transition discourse is hot.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @AuspexTactics, @TabletopTitans, @Goonhammer — all running this format</div>
+        <a class="card-source-link" href="https://www.goonhammer.com" target="_blank">↗ Goonhammer</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="technique" data-vel="high">
+      <div class="card-head">
+        <div class="card-rank">02</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-technique">Technique</span>
+            <span class="badge badge-vel-high">⚡ High</span>
+          </div>
+          <div class="card-title">Armageddon Box Unboxing + Review</div>
+          <div class="card-summary">The Armageddon battlebox has generated strong unboxing content. ASMR-style unboxings and in-depth component reviews are pulling strong numbers, especially with tactile close-up footage.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">YouTube</span>
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Instagram Reels</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Replication</div><div class="detail-stat-value">Medium</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Barrier</div><div class="detail-stat-value">Box needed</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Type</div><div class="detail-stat-value">Content Format</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Peaking</div></div>
+        </div>
+        <div class="card-context">Armageddon battlebox unboxings are the dominant "product launch" content format this week. Best performers are mixing ASMR-adjacent close-up sprue footage with genuine excitement commentary. The "value for money" analysis sub-format is generating significant engagement — comment sections debating points-per-pound are driving watch time. ASMR unboxing version (no voiceover, just tactile sounds + text) also outperforming for short-form. Key content structure: opening reveal → sprue inspection → assembly suggestion → value analysis.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @FauxHammer, @MiniaturePainting, @TheHobbyRoom</div>
+        <a class="card-source-link" href="https://www.gamesworkshop.com" target="_blank">↗ GW Store</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="technique" data-vel="high">
+      <div class="card-head">
+        <div class="card-rank">03</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-technique">Technique</span>
+            <span class="badge badge-vel-high">⚡ High</span>
+          </div>
+          <div class="card-title">Contrast Paints + Speed Painting Tutorial</div>
+          <div class="card-summary">Contrast paint tutorials for beginners remain a content pillar with sustained high demand. "Army-ready in a weekend" messaging is resonating strongly ahead of 11th Edition release hype.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">YouTube</span>
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Instagram</span>
+            <span class="platform-pill">Dakka Dakka</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Replication</div><div class="detail-stat-value">Very High</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Barrier</div><div class="detail-stat-value">Low</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Type</div><div class="detail-stat-value">Hobby Technique</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Evergreen ↑</div></div>
+        </div>
+        <div class="card-context">Contrast paint tutorials are enjoying an above-baseline spike this week driven by new player influx from DoW4 announcement and 11th Edition hype. The "I have never painted before — here's my army after one weekend with only Contrast paints" format is the highest-performing variant. Key technique tips dominating this week: zenithal priming before Contrast for better depth, wet blending Contrast with medium for OSL effects, and layering Contrast over metallic basecoats. Tutorial creators seeing 40-60% above-average views on new uploads this week.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @Squidmar, @PainterlyMinis, @WarhammerTV</div>
+        <a class="card-source-link" href="https://www.youtube.com/results?search_query=contrast+paint+tutorial+40k" target="_blank">↗ YouTube Tutorials</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="technique" data-vel="medium">
+      <div class="card-head">
+        <div class="card-rank">04</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-technique">Technique</span>
+            <span class="badge badge-vel-medium">● Medium</span>
+          </div>
+          <div class="card-title">Glazing for OSL & Gem Effects</div>
+          <div class="card-summary">Glazing tutorials — particularly for Object Source Lighting and gem/jewel effects — are trending on advanced painting forums and YouTube. High save rate on Instagram hobby accounts.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">YouTube</span>
+            <span class="platform-pill">Instagram</span>
+            <span class="platform-pill">Dakka Dakka</span>
+            <span class="platform-pill">Reddit</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Replication</div><div class="detail-stat-value">Medium</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Barrier</div><div class="detail-stat-value">Medium</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Type</div><div class="detail-stat-value">Hobby Technique</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Rising</div></div>
+        </div>
+        <div class="card-context">Glazing technique content is performing above average this week, led by a viral r/minipainting post showing a step-by-step OSL effect on a Necron Overlord that gained 47K upvotes. The tutorial follow-up video from that creator pulled 180K views in 72 hours. Instagram save rate on glazing content is unusually high (saves often indicate "I will try this later" intent = strong tutorial indicator). Key topics: wet palette setup for glazing consistency, the "traffic light" gem method (GW classic technique revival), and plasma glow effects on Space Marine weapons ahead of 11th Edition painting rushes.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @Vince_Venturella, @GarethNicholas_Art, @r/minipainting community</div>
+        <a class="card-source-link" href="https://www.reddit.com/r/minipainting" target="_blank">↗ r/minipainting</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+    <div class="card" data-cat="technique" data-vel="medium">
+      <div class="card-head">
+        <div class="card-rank">05</div>
+        <div class="card-body">
+          <div class="card-badges">
+            <span class="badge badge-cat-technique">Technique</span>
+            <span class="badge badge-vel-medium">● Medium</span>
+          </div>
+          <div class="card-title">"Million Miniatures Challenge" Format</div>
+          <div class="card-summary">Creator challenge format: show your entire unpainted backlog in a dramatic slow pan, then commit to a painting deadline publicly. Self-deprecating, relatable, generates strong comment engagement.</div>
+          <div class="card-platforms">
+            <span class="platform-pill">TikTok</span>
+            <span class="platform-pill">Instagram Reels</span>
+            <span class="platform-pill">YouTube Shorts</span>
+          </div>
+          <div class="card-expand-hint">↓ Tap to expand</div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-grid">
+          <div class="detail-stat"><div class="detail-stat-label">Replication</div><div class="detail-stat-value">Very High</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Barrier</div><div class="detail-stat-value">Minimal</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Type</div><div class="detail-stat-value">Content Format</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Lifecycle</div><div class="detail-stat-value">Sustaining</div></div>
+        </div>
+        <div class="card-context">The "shame pile" or "million miniatures" challenge format has become a reliable community engagement format. Structure: dramatic reveal of unpainted backlog → self-deprecating caption → public commitment to paint X models by a specific date → follow-up content built in. Comment section fills with "same" and mutual accountability replies. Strong for community building. The format also works as a series format: "Week 1 of my challenge" follow-ups. Creator retention mechanic built in — audience checks back to see progress. Ideal for creators who don't have immediate access to trending topics but want consistent engagement.</div>
+        <div class="card-accounts"><strong>Key Accounts:</strong> @PaintingPhase, various hobbyist TikTokers with 5K-50K followers</div>
+        <a class="card-source-link" href="https://www.tiktok.com/search?q=unpainted+miniatures+challenge" target="_blank">↗ TikTok Search</a>
+        <div class="close-hint">Press ESC or click to collapse</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="footer-left">40K WEEKLY DIGEST</div>
+  <div class="footer-right">Auto-generated · Week of May 22, 2026 · 15 items tracked</div>
+</footer>
+
+<script>
+  // Filter logic
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.card');
+  let activeCategory = 'all';
+  let explosiveOnly = false;
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+
+      if (filter === 'explosive') {
+        explosiveOnly = !explosiveOnly;
+        btn.classList.toggle('active', explosiveOnly);
+      } else {
+        filterBtns.forEach(b => { if (b.dataset.filter !== 'explosive') b.classList.remove('active'); });
+        btn.classList.add('active');
+        activeCategory = filter;
+      }
+
+      applyFilters();
+    });
+  });
+
+  function applyFilters() {
+    cards.forEach(card => {
+      const catMatch = activeCategory === 'all' || card.dataset.cat === activeCategory;
+      const velMatch = !explosiveOnly || card.dataset.vel === 'explosive';
+      card.classList.toggle('hidden', !(catMatch && velMatch));
+    });
+  }
+
+  // Expand/collapse logic
+  cards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A') return;
+      const isExpanded = card.classList.contains('expanded');
+      // Collapse all
+      cards.forEach(c => c.classList.remove('expanded'));
+      // Toggle clicked
+      if (!isExpanded) card.classList.add('expanded');
+    });
+  });
+
+  // ESC to collapse
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cards.forEach(c => c.classList.remove('expanded'));
+  });
+</script>
+
+</body>
+</html>
